@@ -437,15 +437,41 @@ app.post('/api/trade', requireLogin, async function (req, res) {
 });
 
 
+
 app.get('/api/health', async function (req, res) {
+  const startedAt = Date.now();
+  console.log('[HEALTH] Request received');
+
   try {
+    console.log('[HEALTH] Starting database query');
+
     await pool.query('SELECT 1');
-    res.json({ status: 'ok', database: 'connected' });
+
+    console.log(
+      '[HEALTH] Database query completed in',
+      Date.now() - startedAt,
+      'ms'
+    );
+
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      responseTimeMs: Date.now() - startedAt
+    });
   } catch (err) {
-    console.error('Health check failed:', err.code);
-    res.status(500).json({ status: 'error', database: 'unreachable' });
+    console.error(
+      '[HEALTH] Database query failed:',
+      err.code || 'UNKNOWN',
+      err.message
+    );
+
+    res.status(500).json({
+      status: 'error',
+      database: 'unreachable'
+    });
   }
 });
+
 
 const initialStockPrices = new Map();
 
