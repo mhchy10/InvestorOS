@@ -618,7 +618,11 @@ app.get('/api/market/history/:symbol', async function (req, res) {
 });
 
 // Move simulated prices every five minutes.
+let priceUpdateRunning = false;
+
 async function updateSimulatedPrices() {
+  if (priceUpdateRunning) return;
+  priceUpdateRunning = true;
   const connection = await pool.getConnection();
 
   try {
@@ -656,6 +660,7 @@ async function updateSimulatedPrices() {
     console.error('Simulated price update failed:', err.code);
   } finally {
     connection.release();
+    priceUpdateRunning = false;
   }
 }
 
