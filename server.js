@@ -101,7 +101,7 @@ app.post('/api/register', async function (req, res) {
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ error: 'An account with this email already exists.' });
     }
-    console.error('Register failed:', err.code);
+    console.error('Register failed:', err.code, err.message, err.cause?.message);
     res.status(500).json({ error: 'Could not create account.' });
   }
 });
