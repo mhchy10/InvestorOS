@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Group C, NC College, Badarpur">
+  <title>InvestorOS — Paper Trading Simulator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+
+   <!-- ===== LOGIN / REGISTER SCREEN (shown when not logged in) ===== -->
+<div id="auth-screen" class="auth-screen" hidden>
+  <div class="auth-shell">
+
+    <aside class="auth-hero">
+      <div class="brand">
+        <img class="brand-logo" src="asset/iologo.jpeg" alt="IO logo">
+        <div class="brand-text">
+          <strong>Investor<span class="brand-os">OS</span></strong>
+          <small>Paper trading simulator</small>
+        </div>
+      </div>
+      <h2>Research. Decide. Practise.</h2>
+      <p>A risk-free workspace for learning how Indian equity investing works.</p>
+      <ul class="auth-points">
+        <li><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i><span>Study stocks and build a thesis before you act</span></li>
+        <li><i class="fa-solid fa-right-left" aria-hidden="true"></i><span>Trade with ₹10,00,000 of virtual capital</span></li>
+        <li><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>Track holdings, profit and loss in one place</span></li>
+      </ul>
+      <p class="auth-foot">Group C · NC College, Badarpur</p>
+    </aside>
+
+    <form id="auth-form" class="auth-card" novalidate>
+      <h1 id="auth-title">Log in</h1>
+      <p class="muted small">Welcome back. Enter your details to continue.</p>
+
+      <div id="auth-name-field" hidden>
+        <label for="auth-name">Name</label>
+        <input id="auth-name" type="text" autocomplete="name" maxlength="100">
+      </div>
+
+      <label for="auth-email">Email</label>
+      <input id="auth-email" type="email" autocomplete="email" maxlength="255">
+
+      <label for="auth-password">Password (at least 8 characters)</label>
+      <input id="auth-password" type="password" autocomplete="current-password">
+
+      <p id="auth-message" class="message" role="alert"></p>
+
+      <button type="submit" id="auth-submit" class="btn btn-primary">Log in</button>
+
+      <p class="muted small">
+        <span id="auth-switch-text">No account yet?</span>
+        <button type="button" id="auth-switch" class="link-btn">Register</button>
+      </p>
+      <p class="muted small">Educational simulation. Virtual money and sample prices only.</p>
+    </form>
+
+  </div>
+</div>
+
+
+  <div class="app" id="app" hidden>
+
+    <!-- ========== SIDEBAR NAVIGATION ========== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo"  src="asset/iologo.jpeg" alt="IO logo">
+        <div class="brand-text">
+          <strong>Investor<span class="brand-os">OS</span></strong>          
+          <small>Paper trading simulator</small>
+        </div>
+      </div>
+
+      <!-- Each link sets the URL hash (#portfolio etc.). script.js listens for the
+           hash change and shows the matching <section class="view">. -->
+      <nav class="nav" aria-label="Main navigation">
+       <a class="nav-link" href="#dashboard" data-view="dashboard"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Dashboard</span></a>
+       <a class="nav-link" href="#market" data-view="market"><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i><span>Market Research</span></a>
+       <a class="nav-link" href="#watchlist" data-view="watchlist"><i class="fa-solid fa-eye" aria-hidden="true"></i><span>Watchlist</span></a>
+       <a class="nav-link" href="#portfolio" data-view="portfolio"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>Portfolio</span></a>
+       <a class="nav-link" href="#trading" data-view="trading"><i class="fa-solid fa-right-left" aria-hidden="true"></i><span>Paper Trading</span></a>
+       <a class="nav-link" href="#journal" data-view="journal"><i class="fa-solid fa-book-open" aria-hidden="true"></i><span>Investment Journal</span></a>
+      <a class="nav-link" href="#settings" data-view="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a>
+    </nav>
+
+
+    <div class="user-box">
+  <span class="user-name" id="user-name"></span>
+  <button type="button" id="logout-btn" class="btn btn-small btn-ghost">Log out</button>
+</div>
+
+    <p class="sidebar-note">
+  Group C · NC College, Badarpur<br>
+  Educational simulation. Virtual money and sample prices only.
+</p>
+  
+    </aside>
+
+    <!-- ========== MAIN AREA ========== -->
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="page-title">Dashboard</h1>
+          <span class="badge">SAMPLE DATA · not live market prices</span>
+        </div>
+        <div class="topbar-actions">
+          <span id="last-refresh" class="muted"></span>
+          <button type="button" id="refresh-btn" class="btn btn-primary">Refresh View</button>
+        </div>
+      </header>
+
+      <!-- Shown only when something needs attention (e.g. storage problems) -->
+      <div id="app-notice" class="notice" role="alert" hidden></div>
+
+      <main class="content">
+
+        <!-- ===== DASHBOARD ===== -->
+        <section class="view" id="view-dashboard">
+          <div class="cards" data-summary></div>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Market (sample prices)</h2>
+                <p class="muted small">Illustrative prices stored in the database. Not live data.</p>
+              </div>
+              <input id="search-input" class="search" type="search"
+                     placeholder="Search by name or symbol" autocomplete="off"
+                     aria-label="Search stocks by name or symbol">
+            </div>
+            <div id="market-table" class="table-wrap"></div>
+          </section>
+
+          <div class="grid-2">
+            <section class="panel">
+              <h2>Portfolio overview</h2>
+              <div id="overview"></div>
+            </section>
+            <section class="panel">
+              <h2>Recent activity</h2>
+              <div id="recent-activity"></div>
+            </section>
+          </div>
+
+          <p class="disclaimer">
+            InvestorOS is an educational paper-trading simulation, not a brokerage.
+            All prices are illustrative sample data, not live market prices, and nothing
+            here is investment advice. No real money is involved.
+          </p>
+        </section>
+
+<section class="view" id="view-market" hidden>
+
+  <!-- STOCK PRICE CHART (database history, simulated) -->
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <h2>Stock price chart</h2>
+      <p class="muted small">SIMULATED / ILLUSTRATIVE prices stored in the database. Not live market data.</p>
+    </div>
+    <select id="hist-stock" class="hist-select" aria-label="Choose a stock for the chart"></select>
+  </div>
+  <div id="hist-ranges" class="hist-ranges" role="group" aria-label="Chart range">
+    <button type="button" class="btn btn-small btn-ghost" data-range="1W">1W</button>
+    <button type="button" class="btn btn-small btn-ghost" data-range="1M">1M</button>
+    <button type="button" class="btn btn-small btn-ghost" data-range="3M">3M</button>
+    <button type="button" class="btn btn-small btn-ghost" data-range="1Y">1Y</button>
+  </div>
+  <div id="hist-stats" class="hist-stats"></div>
+  <div id="hist-chart" class="hist-chart" aria-live="polite"></div>
+</section>
+
+<!-- Old chart elements kept hidden so existing script code doesn't break. Remove later. -->
+<div hidden>
+  <select id="chart-stock"></select>
+  <div id="stock-chart"></div>
+</div>
+
+  <section class="panel">
+    <h2>Company fundamentals and valuation</h2>
+    <p class="notice">DEMONSTRATION DATA: these fundamentals are invented for this project. They are not real company figures and not live market data.</p>
+    <div id="research-table" class="table-wrap"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Compare two companies</h2>
+    <div class="grid-2">
+      <div>
+        <label for="compare-a">Company A</label>
+        <select id="compare-a"></select>
+      </div>
+      <div>
+        <label for="compare-b">Company B</label>
+        <select id="compare-b"></select>
+      </div>
+    </div>
+    <div id="compare-table" class="table-wrap"></div>
+    <p class="muted small">P/E = price ÷ earnings per share. P/B = price ÷ book value per share. Lower values can mean cheaper valuation, but not always better.</p>
+  </section>
+</section>
+
+        <!-- ===== WATCHLIST ===== -->
+        <section class="view" id="view-watchlist" hidden>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Your watchlist</h2>
+                <p class="muted small">Add stocks from the Dashboard. Saved in this browser.</p>
+              </div>
+            </div>
+            <div id="watchlist-table" class="table-wrap"></div>
+          </section>
+        </section>
+
+        <!-- ===== PORTFOLIO ===== -->
+        <section class="view" id="view-portfolio" hidden>
+          <div class="cards" data-summary></div>
+
+          <section class="panel">
+            <h2>Current holdings</h2>
+            <div id="holdings-table" class="table-wrap"></div>
+          </section>
+
+          <section class="panel">
+            <h2>How these numbers are calculated</h2>
+            <ul class="explain">
+              <li><strong>Average purchase price</strong> = total cost of the shares you still hold ÷ number of shares held
+                  (a weighted average, so buying at different prices blends them).</li>
+              <li><strong>Invested</strong> = sum of (quantity × average purchase price) over all holdings.
+                  Cash is never counted as invested.</li>
+              <li><strong>Current value</strong> = quantity × sample price.</li>
+              <li><strong>Unrealized P/L</strong> = current value − invested. "Unrealized" means the gain or loss
+                  is on paper only until you sell.</li>
+              <li><strong>Portfolio value</strong> = virtual cash + current value of all holdings.</li>
+              <li>Sample prices are fixed, so P/L is ₹0.00 right after a purchase. It only changes if the sample
+                  prices in script.js are edited.</li>
+            </ul>
+          </section>
+        </section>
+
+        <!-- ===== PAPER TRADING ===== -->
+        <section class="view" id="view-trading" hidden>
+          <div class="grid-2">
+            <section class="panel">
+              <h2>Place a paper trade</h2>
+              <form id="trade-form" novalidate>
+                <label for="trade-stock">Stock</label>
+                <select id="trade-stock"></select>
+
+                <label for="trade-qty">Quantity (whole shares)</label>
+                <input id="trade-qty" type="number" inputmode="numeric"
+                       min="1" step="1" placeholder="e.g. 10" autocomplete="off">
+
+                <div id="trade-preview" class="preview"></div>
+
+                <div class="form-actions">
+                  <button type="button" id="buy-btn" class="btn btn-buy">Buy</button>
+                  <button type="button" id="sell-btn" class="btn btn-sell">Sell</button>
+                </div>
+                <p id="trade-message" class="message" role="status" aria-live="polite"></p>
+              </form>
+              <p class="muted small">Trades execute at the sample price shown. No fees or taxes are simulated.</p>
+            </section>
+
+            <section class="panel danger-zone">
+              <h2>Reset simulation</h2>
+              <p>Resets virtual cash to ₹10,00,000, removes all holdings and clears the transaction history.
+                 Your watchlist is kept. This cannot be undone.</p>
+              <button type="button" id="reset-btn" class="btn btn-danger">Reset simulation</button>
+            </section>
+          </div>
+
+          <section class="panel">
+            <h2>Transaction history</h2>
+            <div id="history-table" class="table-wrap"></div>
+          </section>
+        </section>
+
+<!-- ===== INVESTMENT JOURNAL ===== -->
+<section class="view" id="view-journal" hidden>
+  <section class="panel">
+    <h2>Investment Journal</h2>
+    <p class="muted small">Record your investment reasoning, risks and review notes.</p>
+
+    <form id="journal-form" novalidate>
+      <label for="journal-stock">Company / Stock</label>
+      <input id="journal-stock" type="text" maxlength="100"
+             placeholder="e.g. Reliance Industries" required>
+
+      <label for="journal-type">Thesis type</label>
+      <select id="journal-type" required>
+        <option value="Bullish">Bullish — expect the price to rise</option>
+        <option value="Bearish">Bearish — expect the price to fall</option>
+        <option value="Neutral">Neutral — observing / undecided</option>
+      </select>
+
+      <label for="journal-thesis">Investment reasoning</label>
+      <textarea id="journal-thesis" rows="3" maxlength="2000"
+                placeholder="Why are you interested in this stock?" required></textarea>
+
+      <label for="journal-risks">Key risks</label>
+      <textarea id="journal-risks" rows="2" maxlength="1000"
+                placeholder="What could make your thesis wrong?"></textarea>
+
+      <label for="journal-review">Review notes (optional)</label>
+      <textarea id="journal-review" rows="2" maxlength="1000"
+                placeholder="What did you learn?"></textarea>
+
+      <button type="submit" class="btn btn-primary">Save Journal Entry</button>
+      <p id="journal-message" class="message" role="status"></p>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Saved Entries</h2>
+    <div id="journal-entries"></div>
+  </section>
+</section>
+
+        <!-- ===== SETTINGS ===== -->
+<section class="view" id="view-settings" hidden>
+  <div class="grid-2">
+    <section class="panel">
+      <h2>Appearance</h2>
+
+      <fieldset class="setting-group">
+        <legend>Theme</legend>
+        <div class="choice-row">
+          <label class="choice"><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+          <label class="choice"><input type="radio" name="theme" value="light"><span>Light</span></label>
+          <label class="choice"><input type="radio" name="theme" value="system"><span>System</span></label>
+        </div>
+        <p class="muted small">System follows your operating system's light/dark setting.</p>
+      </fieldset>
+
+      <fieldset class="setting-group">
+        <legend>Display density</legend>
+        <div class="choice-row">
+          <label class="choice"><input type="radio" name="density" value="comfortable"><span>Comfortable</span></label>
+          <label class="choice"><input type="radio" name="density" value="compact"><span>Compact</span></label>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="panel">
+      <h2>Default landing page</h2>
+      <label for="setting-landing">Open this page first</label>
+      <select id="setting-landing" name="landing">
+        <option value="dashboard">Dashboard</option>
+        <option value="watchlist">Watchlist</option>
+        <option value="portfolio">Portfolio</option>
+        <option value="trading">Paper Trading</option>
+      </select>
+      <p class="muted small">Applies when InvestorOS is opened without a page in the address (no #section at the end). Saved in this browser.</p>
+    </section>
+  </div>
+
+ 
+<section class="panel about-panel">
+  <div class="about-heading">
+    <span class="about-icon"><i class="fa-solid fa-chart-line"></i></span>
+    <div>
+      <h2>About InvestorOS</h2>
+      <p class="muted small">Research smarter. Practise with confidence.</p>
+    </div>
+  </div>
+
+  <p>
+    <strong>InvestorOS</strong> is an educational investment research
+    and paper-trading platform developed to explore the fundamentals
+    of stock analysis, portfolio management and simulated trading.
+  </p>
+
+  <div class="about-features">
+    <span><i class="fa-solid fa-magnifying-glass-chart"></i> Stock Research</span>
+    <span><i class="fa-solid fa-briefcase"></i> Portfolio Tracking</span>
+    <span><i class="fa-solid fa-arrow-right-arrow-left"></i> Paper Trading</span>
+    <span><i class="fa-solid fa-book-open"></i> Investment Journal</span>
+  </div>
+
+  <p class="disclaimer">
+    InvestorOS is a student project, not a brokerage. It uses virtual
+    money and illustrative sample data. It does not provide investment
+    advice or execute real trades.
+  </p>
+
+  <div class="about-team">
+    <h3 class="about-sub">Meet the Team</h3>
+    <p class="muted small">Group C · NC College, Badarpur</p>
+
+    <div class="team-list">
+      <div class="team-member"><span class="member-number">01</span><strong>Mehdi Hussain Choudhury</strong></div>
+      <div class="team-member"><span class="member-number">02</span><strong>Eakbal Hussain Mozumdar</strong></div>
+      <div class="team-member"><span class="member-number">03</span><strong>Afsar Uddin Lasker</strong></div>
+      <div class="team-member"><span class="member-number">04</span><strong>Abu Numan Talukdar</strong></div>
+      <div class="team-member"><span class="member-number">05</span><strong>Mufidul Hasan Barbhuiya</strong></div>
+    </div>
+
+    <p class="muted small about-footer">
+      Final-year project · Department of BVoc in IT · 2026
+    </p>
+  </div>
+
+
+   
+<div class="about-feedback">
+  <h3 class="about-sub">Share Your Feedback</h3>
+  <p class="muted small">
+    Tried InvestorOS? Tell us what you think and what we could improve.
+  </p>
+
+  <form id="feedback-form" class="feedback-form">
+    <label for="feedback-rating">Overall experience</label>
+    <select id="feedback-rating" required>
+     <option value="">⭐ Choose a rating</option>
+<option value="5">🤩 5 — Excellent</option>
+<option value="4">😊 4 — Good</option>
+<option value="3">😐 3 — Average</option>
+<option value="2">😕 2 — Needs improvement</option>
+<option value="1">😞 1 — Poor</option>
+    </select>
+
+    <label for="feedback-feature">Which feature did you try?</label>
+    <select id="feedback-feature" required>
+      <option value="">🔍 Choose a feature</option>
+<option value="Market Research">📊 Market Research</option>
+<option value="Watchlist">⭐ Watchlist</option>
+<option value="Portfolio">💼 Portfolio</option>
+<option value="Paper Trading">📈 Paper Trading</option>
+<option value="Investment Journal">📔 Investment Journal</option>
+<option value="Other">💡 Other</option>
+    </select>
+
+    <label for="feedback-message">Your feedback or suggestions</label>
+    <textarea
+      id="feedback-message"
+      rows="4"
+      minlength="5"
+      maxlength="2000"
+      placeholder="What did you like? What should we improve?"
+      required
+    ></textarea>
+
+    <label for="feedback-contact">Contact detail (optional)</label>
+    <input
+      id="feedback-contact"
+      type="text"
+      maxlength="255"
+      placeholder="Email or mobile number"
+    />
+
+    <button type="submit" class="btn-primary">Submit Feedback</button>
+    <p id="feedback-status" class="muted small" role="status"></p>
+  </form>
+</div>
+
+<div id="admin-feedback-panel" class="about-feedback" hidden>
+  <h3 class="about-sub">Admin Feedback Inbox</h3>
+  <button type="button" id="load-feedback-btn" class="btn-primary">
+    Load Feedback
+  </button>
+  <p id="admin-feedback-status" class="muted small" role="status"></p>
+  <div id="admin-feedback-list"></div>
+</div>
+
+
+
+</section>
+
+</section>
+ 
+      </main>
+    </div>
+  </div>
+
+  <!-- Script is loaded last so every element above already exists when it runs -->
+  <script src="script.js"></script>
+</body>
+</html>
