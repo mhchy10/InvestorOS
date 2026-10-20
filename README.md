@@ -119,6 +119,8 @@ Developed as a collaborative university project.
 
 Add contributor names here.
 
-📄 License
+## License
 
-This project was developed for educational purposes. No open-source license has been specified.
+InvestorOS is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2026 InvestorOS contributors.
